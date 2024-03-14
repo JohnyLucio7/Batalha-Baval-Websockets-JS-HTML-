@@ -12,7 +12,13 @@ wss.on('connection', function connection(ws){
 	if(!waitingPlayer)
 	{
 		waitingPlayer = ws;
-		ws.send("Aguardando o segundo jogador entrar..."); // o cliente recebe a msg
+
+		const waitingMessage = {
+			type: 'waiting',
+			content: 'Aguardando o segundo jogador entrar...'
+		};
+
+		sendMessageToAll(waitingMessage);
 	}
 	else
 	{
@@ -30,9 +36,16 @@ wss.on('connection', function connection(ws){
 			},
 		}
 
+		const gameMessage = {
+			type: 'game',
+			content: game
+		};
+
 		games.push(game);
 
 		startGame(game);
+
+		sendMessageToAll(gameMessage);
 	}
 
 	ws.on('message', function incoming(message){
@@ -43,12 +56,26 @@ wss.on('connection', function connection(ws){
 		handleDisconnect(ws);
 	});
 
-	//ws.send('Bem vindo cliente');
 });
 
+function sendMessageToAll(message) {
+   wss.clients.forEach(client => {
+
+      if (client.readyState === WebSocket.OPEN) {
+
+         client.send(JSON.stringify(message));
+      }
+   });
+}
+
 function startGame(game){
-	game.player1.send("Game started!");
-    game.player2.send("Game started!");
+
+	const startGameMessage = {
+		type: 'initial',
+		content: 'Game started!'
+	};
+
+	sendMessageToAll(startGameMessage);
 }
 
 function handleMessage(ws, message) {
