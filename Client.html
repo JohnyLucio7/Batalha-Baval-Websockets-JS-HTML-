@@ -26,12 +26,10 @@
             border: 1px solid black;
         }
 
-        /* Adiciona sombreamento quando o mouse passa sobre as células */
         td:hover {
             background-color: rgba(0, 0, 0, 0.1);
         }
 
-        /* Muda a cor das células quando são clicadas */
         .clicked {
             background-color: rgba(0, 0, 0, 0.3);
         }
@@ -353,11 +351,6 @@
             </tr>
         </table>
     </div>
-
-
-
-
-
     <script>
         const ws = new WebSocket('ws://localhost:8080');
 
@@ -408,7 +401,6 @@
             // Adicione aqui a lógica para enviar a posição ao servidor, por exemplo:
             // ws.send(cellId); // Envie a posição clicada para o servidor via WebSocket
         }
-
     </script>
 </body>
 </html>
