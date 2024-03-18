@@ -3,46 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>WebSocket Client</title>
-    <style>
-
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        table {
-            width: 100%;
-            height: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            width: 30px;
-            height: 30px;
-            padding: 20px;
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid black;
-        }
-
-        td:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .clicked {
-            background-color: rgba(0, 0, 0, 0.3);
-        }
-
-    </style>
+    <link rel="stylesheet" type="text/css" href="./Styles.css">
 </head>
 <body>
-    <div id="status">Text</div>
+    <div id="status">Message</div>
+    <div id="state">State</div>
 
     <div id="Boards">
         <table>
-            <tr>
-                <td>
+            <tr class="Boards-tr">
+                <td class="Boards-td">
                     <div id="myBoard">
                         <table>
                             <thead>
@@ -195,7 +165,7 @@
                         </table>
                     </div>
                 </td>
-                <td>
+                <td class="Boards-td">
                     <div id="EnemyBoard">
                         <table>
                             <thead>
@@ -351,56 +321,7 @@
             </tr>
         </table>
     </div>
-    <script>
-        const ws = new WebSocket('ws://localhost:8080');
 
-        let game = null;
-
-        ws.onopen = function(event) {
-            console.log('Conexão estabelecida');
-            ws.send('Olá, servidor!');
-        };
-
-        ws.onmessage = function(event) {
-
-            const message = JSON.parse(event.data);
-
-            switch(message.type)
-            {
-            case 'waiting':
-                formatGameStartedMessage(message);
-                break;
-            case 'initial':
-                formatGameStartedMessage(message);
-                break;
-            case 'game':
-                console.log(message);
-                game = message.content;
-                console.log(game);
-                break;
-            default:
-                break;
-            }
-        };
-
-        ws.onerror = function(event) {
-            console.error('Erro de WebSocket detectado:', event);
-        };
-
-        function formatGameStartedMessage(message)
-        {
-            console.log('Mensagem do servidor:', message.content.toString());
-            document.getElementById('status').innerText = message.content.toString();
-        }
-
-        function cellClicked(cellId) {
-            // Função a ser executada quando uma célula é clicada
-            console.log('Célula clicada:', cellId);
-            document.getElementById(cellId).style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-            console.log(ws)
-            // Adicione aqui a lógica para enviar a posição ao servidor, por exemplo:
-            // ws.send(cellId); // Envie a posição clicada para o servidor via WebSocket
-        }
-    </script>
+    <script src="./Client.js"></script>
 </body>
 </html>

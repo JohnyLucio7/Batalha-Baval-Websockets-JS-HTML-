@@ -1,0 +1,32 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    margin: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid black;
+}
+
+td:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.clicked {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.Boards-td{
+}
+
+.Boards-tr{
+}
+
