@@ -63,12 +63,12 @@ wss.on('connection', function connection(ws){
 				[player1ID.content]: {...squadron},
 				[player2ID.content]: {...squadron}
 			},
+			boards: {
+				[player1ID.content]: [],
+				[player2ID.content]: [],
+			},
 			currentPlayer: player1,
 			state: GameState.SETUP,
-			boards:{
-				player1:[],
-				player2:[]
-			},
 		}
 
 		games.push(game);
