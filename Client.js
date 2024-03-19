@@ -6,7 +6,6 @@
  const green = 'green';
  const orange = 'orange';
 
-
  let game = null;
  let ID = null;
 
@@ -203,4 +202,9 @@ function spawnCruisers(cellId)
 
         game.troops[ID].cruisers--;
     }
+}
+
+function onReady()
+{
+    console.log('Ready!');
 }
