@@ -60,9 +60,12 @@ function formatGameStartedMessage(message)
 }
 
 function cellClicked(cellId) {
+
     if(game == null) return;
 
-    if(game.state === 'setup')
+    console.log(cellId.length);
+
+    if(game.state === 'setup' && cellId.length == 2)
     {
         let troops = game.troops[ID];
 
