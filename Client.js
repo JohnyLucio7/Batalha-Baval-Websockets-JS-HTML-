@@ -8,10 +8,17 @@
 
  let game = null;
  let ID = null;
+ let isReady = false;
 
  ws.onopen = function(event) {
     console.log('Conexão estabelecida');
-    ws.send('Olá, servidor!');
+
+    const initialMessage = {
+        type: 'single',
+        content: 'Olá, servidor!'
+    };
+
+    ws.send(JSON.stringify(initialMessage));
 };
 
 ws.onmessage = function(event) {
@@ -29,6 +36,9 @@ ws.onmessage = function(event) {
     case 'initial':
         game = message.game;
         formatGameStartedMessage(message);
+        break;
+    case 'gameplay':
+        onGamePlay(message);
         break;
     default:
         break;
@@ -204,7 +214,46 @@ function spawnCruisers(cellId)
     }
 }
 
+function haveTroops()
+{
+    let troops = game.troops[ID];
+
+    return troops.aircraftCarrier + troops.battleships + troops.seaplanes + troops.submarines + troops.cruisers;
+}
+
 function onReady()
 {
-    console.log('Ready!');
+    if(haveTroops())
+    {
+        console.log("Você ainda possui tropas a se posicionar");
+    }
+
+    if(haveTroops() == false && isReady == false)
+    {
+        isReady = true;
+
+        console.log("Todas as suas tropas foram posicionadas");
+
+        console.log("Vou avisar o servidor");
+
+        console. log(game.boards[ID]);
+
+        const readyMessage = {
+            playerId: ID,
+            type: 'ready',
+            gameId: game.id,
+            board: game.boards[ID],
+            content: 'Estou pronto para a partida servidor',
+        };
+
+        ws.send(JSON.stringify(readyMessage));
+    }
+}
+
+function onGamePlay(message)
+{
+    console.log('Mensagem do servidor:', message.content.toString());
+
+    document.getElementById('status').innerText = message.content.toString();
+    document.getElementById('state').innerText = message.game.state.toUpperCase();
 }

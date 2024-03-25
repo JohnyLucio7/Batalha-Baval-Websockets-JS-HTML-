@@ -56,7 +56,10 @@ wss.on('connection', function connection(ws){
 		player1.send(JSON.stringify(player1ID));
 		player2.send(JSON.stringify(player2ID));
 
+		const gameID = generateGameId();
+
 		const game = {
+			id: gameID,
 			player1,
 			player2,
 			troops: {
@@ -69,6 +72,7 @@ wss.on('connection', function connection(ws){
 			},
 			currentPlayer: player1,
 			state: GameState.SETUP,
+			playersReady: 0
 		}
 
 		games.push(game);
@@ -87,13 +91,13 @@ wss.on('connection', function connection(ws){
 });
 
 function sendMessageToAll(message) {
-   wss.clients.forEach(client => {
+	wss.clients.forEach(client => {
 
-      if (client.readyState === WebSocket.OPEN) {
+		if (client.readyState === WebSocket.OPEN) {
 
-         client.send(JSON.stringify(message));
-      }
-   });
+			client.send(JSON.stringify(message));
+		}
+	});
 }
 
 function startGame(game){
@@ -109,13 +113,80 @@ function startGame(game){
 }
 
 function handleMessage(ws, message) {
-	console.log('Mensagem recebida: ', message.toString());	
+
+	const msg = JSON.parse(message);
+
+	switch(msg.type)
+	{
+	case 'single':
+		console.log('[SINGLE-MSG]: ', msg.content);
+		break;
+	case 'ready':
+		onPlayerIsReady(msg);
+		break;
+	default:
+		break;
+	}
+
+
 }
 
 function handleDisconnect(ws) {
-   console.log('Um cliente se desconectou!');
+	console.log('Um cliente se desconectou!');
 }
 
 function generatePlayerId() {
-    return 'player_' + Math.random().toString(36).substr(2, 9);
+	return 'player_' + Math.random().toString(36).substr(2, 9);
+}
+
+function generateGameId() {
+	return 'Game_' + Math.random().toString(36).substr(2, 9);
+}
+
+function getGameById(id)
+{
+	const game = games.find(game => game.id === id);
+
+	return game;
+}
+
+function updateGameList(gameUpdated)
+{
+	games.forEach((game, index) => {
+
+		if(gameUpdated.id === game.id)
+		{
+			games[index] = gameUpdated;
+			console.log(`New boards: ${JSON.stringify(games[index].boards)}`);
+		}
+	});
+}
+
+function onPlayerIsReady(message)
+{
+	console.log(`[READY-MSG]: ${message.content} - ${message.playerId} - ${message.gameId} - ${message.board}`);
+
+	let currentGame = getGameById(message.gameId);
+
+	currentGame.playersReady++;
+
+	currentGame.boards[message.playerId] = message.board;
+
+	if(currentGame.playersReady == 2)
+	{
+		currentGame.state = GameState.GAMEPLAY;
+
+		const startGamePlayMessage = {
+			type:'gameplay',
+			content: 'Hora da batalha',
+			game: currentGame,
+		};
+
+		updateGameList(currentGame);
+		sendMessageToAll(startGamePlayMessage);
+	}
+	else
+	{
+		updateGameList(currentGame);
+	}
 }
