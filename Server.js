@@ -22,7 +22,6 @@ let squadron = {
 	cruisers: 3
 }
 
-
 wss.on('connection', function connection(ws){
 
 	if(!waitingPlayer)
@@ -62,6 +61,9 @@ wss.on('connection', function connection(ws){
 			id: gameID,
 			player1,
 			player2,
+			player1Id: player1ID,
+			player2Id: player2ID,
+			currentTurnPlayerId: player1ID,
 			troops: {
 				[player1ID.content]: {...squadron},
 				[player2ID.content]: {...squadron}
@@ -127,8 +129,6 @@ function handleMessage(ws, message) {
 	default:
 		break;
 	}
-
-
 }
 
 function handleDisconnect(ws) {

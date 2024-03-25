@@ -9,6 +9,7 @@
  let game = null;
  let ID = null;
  let isReady = false;
+ let isYourTurn = false;
 
  ws.onopen = function(event) {
     console.log('Conexão estabelecida');
@@ -53,6 +54,7 @@ function formatGameStartedMessage(message)
 {
     console.log('Mensagem do servidor:', message.content.toString());
 
+    document.getElementById('turn').innerText = 'Build Turn';
     document.getElementById('status').innerText = message.content.toString();
     document.getElementById('state').innerText = message.state.toUpperCase();
 }
@@ -256,4 +258,10 @@ function onGamePlay(message)
 
     document.getElementById('status').innerText = message.content.toString();
     document.getElementById('state').innerText = message.game.state.toUpperCase();
+
+    console.log(`Seu Id: ${ID} - TurnID: ${message.game.currentTurnPlayerId.content}`);
+
+    isYourTurn = message.game.currentTurnPlayerId.content === ID;
+
+    document.getElementById('turn').innerText = (isYourTurn) ? 'Seu Turno!' : 'Turno do outro!';
 }
