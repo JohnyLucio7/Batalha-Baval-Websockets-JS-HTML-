@@ -2,9 +2,11 @@
 
  const yellow = 'yellow';
  const red = 'red';
- const blue = 'cyan';
+ const blue = 'rgb(0, 0, 255)';
+ const cyan = 'cyan';
  const green = 'green';
  const orange = 'orange';
+ const gray = "rgb(128, 128, 128)";
 
  let game = null;
  let ID = null;
@@ -63,7 +65,7 @@ function cellClicked(cellId) {
 
     if(game == null) return;
 
-    console.log(cellId.length);
+    console.log(`cellId length: ${cellId.length} - GAMESTATE: ${game.state}`);
 
     if(game.state === 'setup' && cellId.length == 2)
     {
@@ -95,6 +97,29 @@ function cellClicked(cellId) {
             spawnCruisers(cellId);
         }
     }
+
+    if(game.state === 'gameplay' && cellId.length == 3 && isYourTurn)
+    {
+        const cell = cellId.slice(1);
+
+        const EnemyBoard = game.boards[getOpponentPlayer(ID, game)];
+
+        const hit = EnemyBoard.includes(cell);
+
+        if(hit)
+        {
+            document.getElementById(cellId).style.backgroundColor = gray;
+        }else
+        {
+            document.getElementById(cellId).style.backgroundColor = blue;
+        }
+
+        console.log(`Tabela inimiga: ${EnemyBoard}`);
+
+        console.log(`Acertei? ${EnemyBoard.includes(cell)}`);
+
+
+    }
 }
 
 function spawnAircraftCarrier(cellId)
@@ -113,7 +138,7 @@ function spawnAircraftCarrier(cellId)
             game.boards[ID].push(cell);
         }
 
-      game.troops[ID].aircraftCarrier--;
+        game.troops[ID].aircraftCarrier--;
     }
 }
 
@@ -172,9 +197,9 @@ function spawnSeaplanes(cellId)
 
     if(canSpawn)
     {
-        document.getElementById(headCell).style.backgroundColor = blue;
-        document.getElementById(leftCell).style.backgroundColor = blue;
-        document.getElementById(rightCell).style.backgroundColor = blue;
+        document.getElementById(headCell).style.backgroundColor = cyan;
+        document.getElementById(leftCell).style.backgroundColor = cyan;
+        document.getElementById(rightCell).style.backgroundColor = cyan;
 
         game.boards[ID].push(headCell);
         game.boards[ID].push(leftCell);
@@ -241,7 +266,7 @@ function onReady()
 
         console.log("Vou avisar o servidor");
 
-        console. log(game.boards[ID]);
+        console.log(game.boards[ID]);
 
         const readyMessage = {
             playerId: ID,
@@ -257,6 +282,8 @@ function onReady()
 
 function onGamePlay(message)
 {
+    game = message.game;
+
     console.log('Mensagem do servidor:', message.content.toString());
 
     document.getElementById('status').innerText = message.content.toString();
@@ -267,4 +294,20 @@ function onGamePlay(message)
     isYourTurn = message.game.currentTurnPlayerId.content === ID;
 
     document.getElementById('turn').innerText = (isYourTurn) ? 'Seu Turno!' : 'Turno do outro!';
+}
+
+function getOpponentPlayer(playerId, game)
+{
+    if (game.player1Id.content === playerId) 
+    {
+        return game.player2Id.content;
+    } 
+    else if (game.player2Id.content === playerId) 
+    {
+        return game.player1Id.content;
+    } 
+    else 
+    {
+        return null;
+    }
 }
