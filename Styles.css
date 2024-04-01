@@ -30,3 +30,29 @@ td:hover {
 .Boards-tr{
 }
 
+.text {
+    font-family: Arial, sans-serif; 
+    font-size: 16px; 
+    color: #333; 
+    line-height: 1.5; 
+    margin-bottom: 10px; 
+}
+
+.button {
+    display: inline-block; 
+    padding: 10px 20px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align: center; 
+    color: #fff; 
+    background-color: #007bff; 
+    border: none; 
+    border-radius: 5px;
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+}
+
+.button:hover {
+    background-color: #0056b3; 
+}
+

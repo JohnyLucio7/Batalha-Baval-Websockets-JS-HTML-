@@ -12,6 +12,7 @@
  let ID = null;
  let isReady = false;
  let isYourTurn = false;
+ let hitList = [];
 
  ws.onopen = function(event) {
     console.log('Conexão estabelecida');
@@ -43,6 +44,12 @@ ws.onmessage = function(event) {
     case 'gameplay':
         onGamePlay(message);
         break;
+    case 'turn':
+        onTurnChange(message);
+        break;
+    case 'lose':
+        onLose(message);
+        break;
     default:
         break;
     }
@@ -56,16 +63,22 @@ function formatGameStartedMessage(message)
 {
     console.log('Mensagem do servidor:', message.content.toString());
 
-    document.getElementById('turn').innerText = 'Build Turn';
     document.getElementById('status').innerText = message.content.toString();
     document.getElementById('state').innerText = message.state.toUpperCase();
+
+    if(game == null)
+    {
+        document.getElementById('turn').innerText = 'Aguarde para posicionar suas tropas!';  
+    }
+    else
+    {
+        document.getElementById('turn').innerText = 'Posicione suas tropas!'; 
+    }
 }
 
 function cellClicked(cellId) {
 
     if(game == null) return;
-
-    console.log(`cellId length: ${cellId.length} - GAMESTATE: ${game.state}`);
 
     if(game.state === 'setup' && cellId.length == 2)
     {
@@ -109,16 +122,39 @@ function cellClicked(cellId) {
         if(hit)
         {
             document.getElementById(cellId).style.backgroundColor = gray;
-        }else
+            hitList.push(cell);
+
+            if(areListsEqual(EnemyBoard, hitList))
+            {
+                isYourTurn = false;
+                console.log('Você venceu!');
+                document.getElementById('winner').innerText = 'Você venceu!';
+
+                const winnerMessage = {
+                    type: 'winner',
+                    opponentId: getOpponentPlayer(ID, game),
+                    game: game,
+                };
+
+                ws.send(JSON.stringify(winnerMessage));
+            }
+        }
+        else
         {
             document.getElementById(cellId).style.backgroundColor = blue;
+
+            isYourTurn = false;
+
+            const changeTurnMessage = {
+                type: 'turn',
+                opponentId: getOpponentPlayer(ID, game),
+                game: game,
+            };
+
+            ws.send(JSON.stringify(changeTurnMessage));
+
+            document.getElementById('turn').innerText = 'Turno do outro!';
         }
-
-        console.log(`Tabela inimiga: ${EnemyBoard}`);
-
-        console.log(`Acertei? ${EnemyBoard.includes(cell)}`);
-
-
     }
 }
 
@@ -253,20 +289,17 @@ function haveTroops()
 
 function onReady()
 {
-    if(haveTroops())
+    if(game == null) return;
+
+    if(haveTroops() == true && isReady == false)
     {
-        console.log("Você ainda possui tropas a se posicionar");
+        document.getElementById('ready').innerText = 'Você ainda possui tropas a se posicionar!';
+        document.getElementById('ready').style.color = "red";
     }
 
     if(haveTroops() == false && isReady == false)
     {
         isReady = true;
-
-        console.log("Todas as suas tropas foram posicionadas");
-
-        console.log("Vou avisar o servidor");
-
-        console.log(game.boards[ID]);
 
         const readyMessage = {
             playerId: ID,
@@ -277,6 +310,10 @@ function onReady()
         };
 
         ws.send(JSON.stringify(readyMessage));
+
+        document.getElementById('turn').innerText = 'Tropas posicionadas!'; 
+        document.getElementById('ready').innerText = 'Suas tropas estão prontas para partida!';
+        document.getElementById('ready').style.color = "green";
     }
 }
 
@@ -296,6 +333,18 @@ function onGamePlay(message)
     document.getElementById('turn').innerText = (isYourTurn) ? 'Seu Turno!' : 'Turno do outro!';
 }
 
+function onTurnChange(message)
+{
+    isYourTurn = true;
+    document.getElementById('turn').innerText = 'Seu Turno!';
+}
+
+function onLose(message)
+{
+    isYourTurn = false;
+    document.getElementById('winner').innerText = 'Você Perdeu!';
+}
+
 function getOpponentPlayer(playerId, game)
 {
     if (game.player1Id.content === playerId) 
@@ -310,4 +359,13 @@ function getOpponentPlayer(playerId, game)
     {
         return null;
     }
+}
+
+function areListsEqual(list1, list2) 
+{
+    if (list1.length !== list2.length) {
+        return false; 
+    }
+    
+    return list1.every(element => list2.includes(element));
 }

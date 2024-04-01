@@ -6,9 +6,10 @@
     <link rel="stylesheet" type="text/css" href="./Styles.css">
 </head>
 <body>
-    <div id="status">Message</div>
-    <div id="state">State</div>
-    <div id="turn">Turn</div>
+    <div id="status" class="text">Message</div>
+    <div id="state" class="text">State</div>
+    <div id="turn" class="text">Turn</div>
+    <div id="winner" class="text">Vencedor a ser definido</div>
 
     <div id="Boards">
 
@@ -328,7 +329,8 @@
             </tr>
         </table>
 
-        <button onclick="onReady()">Ready</button>
+        <button onclick="onReady()" class="button">Ready</button> 
+        <div id="ready" class="text"></div>
     </div>
 
     <script src="./Client.js"></script>

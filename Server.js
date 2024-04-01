@@ -34,7 +34,7 @@ wss.on('connection', function connection(ws){
 			state: GameState.WAITING,
 		};
 
-		sendMessageToAll(waitingMessage);
+		waitingPlayer.send(JSON.stringify(waitingMessage));
 	}
 	else
 	{
@@ -61,9 +61,17 @@ wss.on('connection', function connection(ws){
 			id: gameID,
 			player1,
 			player2,
+			playersReady: 0,
 			player1Id: player1ID,
 			player2Id: player2ID,
+			currentPlayer: player1,
+			state: GameState.SETUP,
 			currentTurnPlayerId: player1ID,
+			webSockets:
+			{
+				[player1ID.content]:player1,
+				[player2ID.content]:player2,
+			},
 			troops: {
 				[player1ID.content]: {...squadron},
 				[player2ID.content]: {...squadron}
@@ -72,9 +80,6 @@ wss.on('connection', function connection(ws){
 				[player1ID.content]: [],
 				[player2ID.content]: [],
 			},
-			currentPlayer: player1,
-			state: GameState.SETUP,
-			playersReady: 0
 		}
 
 		games.push(game);
@@ -106,12 +111,13 @@ function startGame(game){
 
 	const startGameMessage = {
 		type: 'initial',
-		content: 'Setup Game started!',
+		content: 'Fase de construção iniciada!',
 		game: game,
 		state: GameState.SETUP,
 	};
 
-	sendMessageToAll(startGameMessage);
+	game.player1.send(JSON.stringify(startGameMessage));
+	game.player2.send(JSON.stringify(startGameMessage));
 }
 
 function handleMessage(ws, message) {
@@ -125,6 +131,12 @@ function handleMessage(ws, message) {
 		break;
 	case 'ready':
 		onPlayerIsReady(msg);
+		break;
+	case 'turn':
+		onTurnChange(msg);
+		break;
+	case 'winner':
+		onWinner(msg);
 		break;
 	default:
 		break;
@@ -183,10 +195,41 @@ function onPlayerIsReady(message)
 		};
 
 		updateGameList(currentGame);
-		sendMessageToAll(startGamePlayMessage);
+
+		currentGame.player1.send(JSON.stringify(startGamePlayMessage));
+		currentGame.player2.send(JSON.stringify(startGamePlayMessage));
 	}
 	else
 	{
 		updateGameList(currentGame);
 	}
+}
+
+function onTurnChange(message)
+{
+	console.log(message);
+	const game = getGameById(message.game.id);
+	const playerId = message.opponentId;
+
+	const turnMessage = {
+		type: 'turn',
+		content: 'is Your turn!',
+	};
+
+	game.webSockets[playerId].send(JSON.stringify(turnMessage));
+}
+
+function onWinner(message)
+{
+	console.log('alguém venceu!');
+	
+	const game = getGameById(message.game.id);
+	const playerId = message.opponentId;
+
+	const loseMessage = {
+		type: 'lose',
+		content: 'You Lose!',
+	};
+
+	game.webSockets[playerId].send(JSON.stringify(loseMessage));
 }
